@@ -4,11 +4,11 @@ import subprocess
 
 def createNewAdminUser():
     username = raw_input("What username would you like? ")
-    available = True
+    available = False
     try:
         subprocess.call(["id", "-u", username])
     except subprocess.CalledProcessError:
-        available = False
+        available = True
     assert available, "That username is already in use."
 
     subprocess.call(["sudo", "adduser", "--gecos", "", username]) # create user
