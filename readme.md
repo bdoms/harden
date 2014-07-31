@@ -1,3 +1,6 @@
+Copyright &copy; 2014, [Brendan Doms](http://www.bdoms.com/)  
+Licensed under the [MIT license](http://www.opensource.org/licenses/MIT)
+
 # Harden
 This is a script to prepare an Ubuntu box intended to be used as a web server.
 Specifically, it:
@@ -18,7 +21,7 @@ To automatically rate limit access to an opened port include that port in the `-
 
 To log access to an opened port include that port in the `--log_ports` list.
 
-Harden uses [UFW]() as its firewall.
+Harden uses [UFW](https://help.ubuntu.com/community/UFW) as its firewall.
 You can continue to change its behavior after this script has run using its usual commands.
 
 ## Other Considerations
