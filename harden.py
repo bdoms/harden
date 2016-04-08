@@ -1,9 +1,14 @@
 import argparse
 import subprocess
 
+try:
+    input = raw_input
+except NameError:
+    pass
+
 
 def createNewAdminUser():
-    username = raw_input("What username would you like? ")
+    username = input("What username would you like? ")
     available = False
     try:
         subprocess.call(["id", "-u", username])
@@ -31,8 +36,8 @@ def restrictPorts(open_ports, limit_ports, log_ports):
         warning = "WARNING! 22 is not in the list of ports to keep open.\n"
         warning += "Without it, you will not be able to remotely login\n"
         warning += "unless you have SSH configured to use a different port."
-        print warning
-        response = raw_input("Are you sure you want to continue without port 22 (y|n)? ").lower()
+        print(warning)
+        response = input("Are you sure you want to continue without port 22 (y|n)? ").lower()
         if response != "y" and response != "yes":
             return
 
