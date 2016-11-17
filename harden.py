@@ -1,6 +1,9 @@
 import argparse
+import os
+import shutil
 import subprocess
 
+# support both Python 2 and 3
 try:
     input = raw_input
 except NameError:
@@ -8,27 +11,42 @@ except NameError:
 
 
 def createNewAdminUser():
+    root_keys = os.path.join(os.path.sep, "root", ".ssh", "authorized_keys")
+    assert os.path.exists(root_keys), "Root has no SSH keys."
+
     username = input("What username would you like? ")
     available = False
     try:
-        subprocess.call(["id", "-u", username])
+        # note that call does not trigger the error, but check_output does
+        subprocess.check_output(["id", "-u", username])
     except subprocess.CalledProcessError:
         available = True
     assert available, "That username is already in use."
 
-    subprocess.call(["sudo", "adduser", "--gecos", "", username]) # create user
-    subprocess.call(["sudo", "adduser", username, "sudo"]) # add to sudo group
+    # create user and add to sudo group
+    subprocess.call(["adduser", "--disabled-password", "--gecos", "", username])
+    subprocess.call(["adduser", username, "sudo"])
+
+    # copy SSH keys
+    user_ssh = os.path.join(os.path.sep, "home", username, ".ssh")
+    if not os.path.exists(user_ssh):
+        os.mkdir(user_ssh)
+    shutil.copyfile(root_keys, os.path.join(user_ssh, "authorized_keys"))
+
+    # ensure keys are owned by the new user
+    subprocess.call(["chown", "-R", username + ":" + username, user_ssh])
 
 
 def disableRootLogin():
     with open("/etc/ssh/sshd_config", "r+") as sshd_config:
         content = sshd_config.read()
         content = content.replace("PermitRootLogin yes", "PermitRootLogin no")
+        content = content.replace("PasswordAuthentication yes", "PasswordAuthentication no")
         sshd_config.seek(0)
         sshd_config.write(content)
         sshd_config.truncate()
 
-    subprocess.call(["sudo", "service", "ssh", "restart"])
+    subprocess.call(["service", "ssh", "restart"])
 
 
 def restrictPorts(open_ports, limit_ports, log_ports):
@@ -41,7 +59,7 @@ def restrictPorts(open_ports, limit_ports, log_ports):
         if response != "y" and response != "yes":
             return
 
-    subprocess.call(["sudo", "apt-get", "install", "ufw"])
+    subprocess.call(["apt", "install", "ufw"])
 
     for port in open_ports:
         command = ["ufw"]
@@ -61,9 +79,9 @@ def harden(skip_user, open_ports, limit_ports, log_ports):
     if not skip_user:
         createNewAdminUser()
 
-    disableRootLogin()
-
     restrictPorts(open_ports, limit_ports, log_ports)
+
+    disableRootLogin()
 
 
 if __name__ == "__main__":
