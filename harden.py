@@ -24,7 +24,7 @@ def createNewAdminUser():
     assert available, "That username is already in use."
 
     # create user and add to sudo group
-    subprocess.call(["adduser", "--disabled-password", "--gecos", "", username])
+    subprocess.call(["adduser", "--gecos", "", username])
     subprocess.call(["adduser", username, "sudo"])
 
     # copy SSH keys
