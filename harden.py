@@ -40,7 +40,7 @@ def createNewAdminUser():
 def disableRootLogin():
     with open("/etc/ssh/sshd_config", "r+") as sshd_config:
         content = sshd_config.read()
-        content = content.replace("PermitRootLogin yes", "PermitRootLogin no")
+        content = content.replace("PermitRootLogin prohibit-password", "PermitRootLogin no")
         content = content.replace("PasswordAuthentication yes", "PasswordAuthentication no")
         sshd_config.seek(0)
         sshd_config.write(content)
