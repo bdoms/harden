@@ -49,7 +49,7 @@ def disableRootLogin():
     subprocess.call(["service", "ssh", "restart"])
 
 
-def restrictPorts(open_ports, limit_ports, log_ports):
+def restrictPorts(open_ports, limit_ports, log_ports, http3=False):
     if 22 not in open_ports:
         warning = "WARNING! 22 is not in the list of ports to keep open.\n"
         warning += "Without it, you will not be able to remotely login\n"
@@ -67,29 +67,41 @@ def restrictPorts(open_ports, limit_ports, log_ports):
             command.extend(["limit", "in"])
         else:
             command.append("allow")
+
         if port in log_ports:
             command.append("log")
-        command.append(str(port) + "/tcp")
+
+        if http3 and port in (80, 443):
+            command.append(str(port))
+        else:
+            command.append(str(port) + "/tcp")
+
         subprocess.call(command)
 
     subprocess.call(["ufw", "enable"])
 
 
-def harden(skip_user, open_ports, limit_ports, log_ports):
+def harden(skip_user, open_ports, limit_ports, log_ports, http3=False):
     if not skip_user:
         createNewAdminUser()
 
-    restrictPorts(open_ports, limit_ports, log_ports)
+    restrictPorts(open_ports, limit_ports, log_ports, http3=http3)
 
     disableRootLogin()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--ports", nargs="+", type=int, default=[22, 80, 443], help="list of ports to keep open (default: 22 80 443)")
-    parser.add_argument("--limit_ports", nargs="+", type=int, default=[22], help="list of ports to limit access to (default: 22)")
-    parser.add_argument("--log_ports", nargs="+", type=int, default=[22], help="list of ports to log access to (default: 22)")
-    parser.add_argument("--skip_user", action="store_true", help="skip creating a separate non-root user account")
+    parser.add_argument("--http3", action="store_true",
+        help="allow TCP and UDP on ports 80 and 443 if they are open")
+    parser.add_argument("--limit_ports", nargs="+", type=int, default=[22],
+        help="list of ports to limit access to (default: 22)")
+    parser.add_argument("--log_ports", nargs="+", type=int, default=[22],
+        help="list of ports to log access to (default: 22)")
+    parser.add_argument("-p", "--ports", nargs="+", type=int, default=[22, 80, 443],
+        help="list of ports to keep open (default: 22 80 443)")
+    parser.add_argument("--skip_user", action="store_true",
+        help="skip creating a separate non-root user account")
     args = parser.parse_args()
 
-    harden(args.skip_user, args.ports, args.limit_ports, args.log_ports)
+    harden(args.skip_user, args.ports, args.limit_ports, args.log_ports, http3=args.http3)

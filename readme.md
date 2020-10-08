@@ -1,4 +1,4 @@
-Copyright &copy; 2014-2016, [Brendan Doms](http://www.bdoms.com/)  
+Copyright &copy; 2014-2020, [Brendan Doms](http://www.bdoms.com/)
 Licensed under the [MIT license](http://www.opensource.org/licenses/MIT)
 
 # Harden
@@ -38,6 +38,14 @@ To log access to an opened port include it in the `--log_ports` list (default: 2
 
 Harden uses [UFW](https://help.ubuntu.com/community/UFW) as its firewall.
 You can continue to change its behavior after this script has run using its usual commands.
+
+### Support HTTP3
+By default only TCP is allowed on open ports.
+
+Include the `--http3` option for UDP to also be allowed on both ports 80 and 443,
+as this is required for HTTP3 to work.
+
+No other ports will be affected.
 
 
 ## Other Considerations
