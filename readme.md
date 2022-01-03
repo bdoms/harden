@@ -2,7 +2,7 @@ Copyright &copy; 2014-2020, [Brendan Doms](http://www.bdoms.com/)
 Licensed under the [MIT license](http://www.opensource.org/licenses/MIT)
 
 # Harden
-This is a script to prepare an Ubuntu box intended to be used as public a web server.
+This is a script to prepare an Ubuntu box intended to be used as a public web server.
 Specifically, it:
 
  * Creates an admin group user for remote access
